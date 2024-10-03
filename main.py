@@ -6,14 +6,10 @@ from handlers.capture import capture
 
 def main():
     vision_limestone = Vision('./img/to_detect_2.png')
-    loop_time = time()
     while True:
         screenshot = capture("Core Keeper")
 
-        vision_limestone.find(screenshot, 0.6, debug_mode='rectangles')
-
-        print('FPS {}'.format(1 / (time() - loop_time)))
-        loop_time = time()
+        vision_limestone.find(screenshot, 0.6)
 
         if cv.waitKey(1) == ord('q'):
             cv.destroyAllWindows()
