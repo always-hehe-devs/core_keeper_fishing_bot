@@ -4,11 +4,11 @@ from handlers.capture import capture
 
 
 def main():
-    vision_limestone = Vision('./img/to_detect_2.png')
+    img_to_detect = Vision('./img/to_detect_2.png')
     while True:
         screenshot = capture("Core Keeper")
 
-        vision_limestone.find(screenshot, 0.6)
+        img_to_detect.find(screenshot, 0.6)
 
         if cv.waitKey(1) == ord('q'):
             cv.destroyAllWindows()
