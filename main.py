@@ -1,4 +1,3 @@
-from time import time
 from handlers.vision import Vision
 import cv2 as cv
 from handlers.capture import capture
