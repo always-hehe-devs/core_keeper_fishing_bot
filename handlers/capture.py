@@ -4,36 +4,46 @@ import win32gui
 import win32ui
 
 
-def capture(window_name: str):
-    # Adapted from https://stackoverflow.com/questions/19695214/screenshot-of-inactive-window-printwindow-win32gui
+class CaptureScreen:
 
-    windll.user32.SetProcessDPIAware()
-    hwnd = win32gui.FindWindow(None, window_name)
+    def __init__(self, window_name):
+        self.hwnd = None
+        self.bitmap = None
+        self.save_dc = None
+        self.mfc_dc = None
+        self.window_name = window_name
+        self.screenshot = None
 
-    left, top, right, bottom = win32gui.GetClientRect(hwnd)
-    w = right - left
-    h = bottom - top
+        self.hwnd_dc = None
 
-    hwnd_dc = win32gui.GetWindowDC(hwnd)
-    mfc_dc = win32ui.CreateDCFromHandle(hwnd_dc)
-    save_dc = mfc_dc.CreateCompatibleDC()
-    bitmap = win32ui.CreateBitmap()
-    bitmap.CreateCompatibleBitmap(mfc_dc, w, h)
-    save_dc.SelectObject(bitmap)
+    def capture_screen(self):
+        # Adapted from https://stackoverflow.com/questions/19695214/screenshot-of-inactive-window-printwindow-win32gui
+        windll.user32.SetProcessDPIAware()
+        self.hwnd = win32gui.FindWindow(None, self.window_name)
 
-    result = windll.user32.PrintWindow(hwnd, save_dc.GetSafeHdc(), 3)
+        left, top, right, bottom = win32gui.GetClientRect(self.hwnd)
+        w = right - left
+        h = bottom - top
 
-    bmpinfo = bitmap.GetInfo()
-    bmpstr = bitmap.GetBitmapBits(True)
+        self.hwnd_dc = win32gui.GetWindowDC(self.hwnd)
+        self.mfc_dc = win32ui.CreateDCFromHandle(self.hwnd_dc)
+        self.save_dc = self.mfc_dc.CreateCompatibleDC()
+        self.bitmap = win32ui.CreateBitmap()
+        self.bitmap.CreateCompatibleBitmap(self.mfc_dc, w, h)
+        self.save_dc.SelectObject(self.bitmap)
 
-    img = np.frombuffer(bmpstr, dtype=np.uint8).reshape((bmpinfo["bmHeight"], bmpinfo["bmWidth"], 4))
-    img = np.ascontiguousarray(img)[..., :-1]  # make image C_CONTIGUOUS and drop alpha channel
+        windll.user32.PrintWindow(self.hwnd, self.save_dc.GetSafeHdc(), 3)
 
-    if not result:  # result should be 1
-        win32gui.DeleteObject(bitmap.GetHandle())
-        save_dc.DeleteDC()
-        mfc_dc.DeleteDC()
-        win32gui.ReleaseDC(hwnd, hwnd_dc)
-        raise RuntimeError(f"Unable to acquire screenshot! Result: {result}")
+        bmp_info = self.bitmap.GetInfo()
+        bmp_str = self.bitmap.GetBitmapBits(True)
 
-    return img
+        img = np.frombuffer(bmp_str, dtype=np.uint8).reshape((bmp_info["bmHeight"], bmp_info["bmWidth"], 4))
+        img = np.ascontiguousarray(img)[..., :-1]  # make image C_CONTIGUOUS and drop alpha channel
+
+        return img
+
+    def release(self):
+        win32gui.DeleteObject(self.bitmap.GetHandle())
+        self.save_dc.DeleteDC()
+        self.mfc_dc.DeleteDC()
+        win32gui.ReleaseDC(self.hwnd, self.hwnd_dc)
