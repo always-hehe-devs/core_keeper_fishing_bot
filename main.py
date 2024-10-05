@@ -5,6 +5,7 @@ from handlers.capture import capture
 
 def main():
     img_to_detect = Vision('./img/to_detect_2.png')
+    print("Process running...")
     while True:
         screenshot = capture("Core Keeper")
 
