@@ -52,7 +52,7 @@ class Vision:
 
                 pyautogui.moveTo(target_x, target_y)
                 pyautogui.mouseDown(button='right')
-                time.sleep(1.25)
+                time.sleep(1.5)
                 pyautogui.mouseUp(button='right')
 
         if debug_mode:

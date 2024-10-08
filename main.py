@@ -10,7 +10,7 @@ def main():
     while True:
         screenshot = capture.capture_screen()
 
-        img_to_detect.find(screenshot, 0.6, debug_mode="rectangles")
+        img_to_detect.find(screenshot, 0.6)
 
         if cv.waitKey(1) == ord('q'):
             cv.destroyAllWindows()
